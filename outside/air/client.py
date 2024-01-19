@@ -3,7 +3,7 @@ import datetime
 
 import xmltodict
 
-from outside.air.models import AIDXData, FlightData
+from outside.air.models import AIDXData, FlightData, FlightStatus
 from outside.bases import BaseClient
 
 
@@ -48,7 +48,11 @@ class AirClient(BaseClient):
         for flight in data.flights:
             if flight.id in self.finished_flights:
                 continue
-            if flight.relevant_time < self.last_update or not flight.is_inbound:
+            if (
+                flight.relevant_time < self.last_update
+                or not flight.is_inbound
+                or flight.status == FlightStatus.CANCELLED
+            ):
                 self.finished_flights.add(flight.id)
                 continue
             # if we are still waiting for this flight, cancel it and reissue the task with a more recent update
@@ -61,5 +65,11 @@ class AirClient(BaseClient):
         """When the flight is scheduled to land, add the message to the queue."""
         now = datetime.datetime.now(tz=datetime.UTC)
         secs_till_land = (flight.relevant_time - now).total_seconds()
+        # print(
+        #     f"Flight {flight.airline} {flight.flight_number} from {flight.departure_airport.name} lands in"
+        #     f" {secs_till_land}"
+        # )
         await asyncio.sleep(secs_till_land)
         await self.q.put(f"Landed: Flight {flight.airline} {flight.flight_number} from {flight.departure_airport.name}")
+        # noinspection PyAsyncCall
+        self.flight_tasks.pop(flight.id, None)
