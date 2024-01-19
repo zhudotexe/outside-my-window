@@ -1,6 +1,7 @@
 import asyncio
 import datetime
 
+import skytrack.osint
 import xmltodict
 
 from outside.air.models import AIDXData, FlightData, FlightStatus
@@ -73,3 +74,10 @@ class AirClient(BaseClient):
         await self.q.put(f"Landed: Flight {flight.airline} {flight.flight_number} from {flight.departure_airport.name}")
         # noinspection PyAsyncCall
         self.flight_tasks.pop(flight.id, None)
+
+        # launch a task for osint stuff
+        # if flight.tail_number:
+        #     try:
+        #         await asyncio.get_event_loop().run_in_executor(None, skytrack.osint.osint_from_tail(flight.tail_number))
+        #     except Exception:
+        #         pass

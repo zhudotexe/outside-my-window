@@ -38,6 +38,7 @@ class FlightData:
     scheduled_time: datetime.datetime  # TimeType == SCT
     estimated_time: datetime.datetime | None  # TimeType == EST
     actual_time: datetime.datetime | None  # OperationQualifier == TDN/TKO; TimeType == ACT
+    tail_number: str | None
 
     @property
     def is_inbound(self):
@@ -117,6 +118,11 @@ class FlightData:
         else:  # SCH
             status = FlightStatus.ON_TIME
 
+        aircraft_info = ld["AircraftInfo"]
+        tail_number = None
+        if aircraft_info:
+            tail_number = aircraft_info.get("Registration")
+
         return cls(
             id=li["ai:InternalId"],
             airline=li["Airline"],
@@ -128,6 +134,7 @@ class FlightData:
             scheduled_time=scheduled_time,
             estimated_time=estimated_time,
             actual_time=actual_time,
+            tail_number=tail_number,
         )
 
 
