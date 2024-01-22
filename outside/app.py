@@ -2,7 +2,7 @@ import asyncio
 
 from rich.console import Console
 
-from outside.air.client import AirClient
+from .airfr.client import FlightRadarClient
 from .trainclient import TrainClient
 
 
@@ -11,7 +11,7 @@ class OutsideApp:
         self.msg_q = asyncio.Queue()
         self.console = Console()
         # clients
-        self.air = AirClient(self.msg_q)
+        self.air = FlightRadarClient(self.msg_q)
         self.train = TrainClient(self.msg_q)
 
     async def load(self):
