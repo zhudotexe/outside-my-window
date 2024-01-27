@@ -1,4 +1,4 @@
-from .bases import BaseClient
+from outside.bases import BaseClient
 
 
 class TrainClient(BaseClient):

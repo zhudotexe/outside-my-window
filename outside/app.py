@@ -3,7 +3,7 @@ import asyncio
 from rich.console import Console
 
 from .airfr.client import FlightRadarClient
-from .trainclient import TrainClient
+from .train.client import TrainClient
 
 
 class OutsideApp:
