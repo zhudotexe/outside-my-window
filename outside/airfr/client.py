@@ -48,7 +48,10 @@ class FlightRadarClient(BaseClient):
         # request fr24 live data
         message = livefeed_message_create(north=N_BOUND, west=W_BOUND, south=S_BOUND, east=E_BOUND)
         request = livefeed_request_create(message)
-        data = await livefeed_post(self.http, request)
+        try:
+            data = await asyncio.wait_for(livefeed_post(self.http, request), timeout=30)
+        except asyncio.TimeoutError:
+            return
         data = livefeed_response_parse(data)
 
         for flight in data.flights_list:
