@@ -1,4 +1,7 @@
 def a_or_an(word: str, style=None):
+    if not word:
+        return ""
+
     if style:
         inner = f"[{style}]{word}[/{style}]"
     else:
