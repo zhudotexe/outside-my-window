@@ -41,7 +41,10 @@ class FlightRadarClient(BaseClient):
     async def poll_live(self):
         """Task to process all flights in the bounds forever."""
         while True:
-            await self.process_flights()
+            try:
+                await self.process_flights()
+            except Exception:
+                pass
             await asyncio.sleep(REFRESH_TIME)
 
     async def process_flights(self):
