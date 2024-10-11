@@ -1,6 +1,7 @@
 import asyncio
 import datetime
 import json
+import time
 from pathlib import Path
 
 from fr24.livefeed import livefeed_message_create, livefeed_post, livefeed_request_create, livefeed_response_parse
@@ -16,7 +17,7 @@ DATA_PATH = Path(__file__).parent / "data"
 class FlightRadarClient(BaseClient):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.finished_flights = set()
+        self.finished_flights = {}  # flight number, time added
         self.task = None
         self.airport_names = {}
         self.aircraft_types = {}
@@ -43,6 +44,7 @@ class FlightRadarClient(BaseClient):
         while True:
             try:
                 await self.process_flights()
+                self.clean_cache()
             except Exception:
                 pass
             await asyncio.sleep(REFRESH_TIME)
@@ -60,7 +62,7 @@ class FlightRadarClient(BaseClient):
         for flight in data.flights_list:
             if flight.flightid in self.finished_flights:
                 continue
-            self.finished_flights.add(flight.flightid)
+            self.finished_flights[flight.flightid] = time.time()
 
             now = datetime.datetime.now().strftime("%H:%M")
             aircraft_type = self.aircraft_types.get(flight.extra_info.type, flight.extra_info.type)
@@ -76,3 +78,10 @@ class FlightRadarClient(BaseClient):
                 f"[{now}][[bright_cyan]AIR[/bright_cyan]] That's flight [b]{flight.callsign}[/b]"
                 f" {from_or_to_airport} - {a_or_an(aircraft_type, style='b')}."
             )
+
+    def clean_cache(self):
+        """Remove flights from seen if they are more than an hour old"""
+        now = time.time()
+        for flight_id, last_seen in self.finished_flights.copy().items():
+            if last_seen < now - 3600:
+                self.finished_flights.pop(flight_id, None)

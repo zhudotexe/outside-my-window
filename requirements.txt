@@ -1,6 +1,6 @@
-httpx~=0.25.0
-rich~=13.7.0
+fr24==0.1.2
+httpx~=0.27.2
+rich~=13.8.1
 xmltodict~=0.13.0
 
 # skytrack @ git+https://github.com/zhudotexe/skytrack.git@main
-fr24 @ git+https://github.com/cathaypacific8747/fr24@master
